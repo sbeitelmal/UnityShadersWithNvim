@@ -1,0 +1,37 @@
+// DXC Test 7: Texture Sampling in Compute
+// EXPECTED: No errors.
+// TESTS: Texture2D, SamplerState, RWTexture2D — modern HLSL resource types.
+//        These are the correct types for DXC (not sampler2D).
+
+Texture2D<float4> _InputTex;
+SamplerState sampler_InputTex;
+RWTexture2D<float4> _OutputTex;
+
+cbuffer BlurParams : register(b0)
+{
+    float2 _TexelSize;
+    float _BlurRadius;
+    float _Padding;
+};
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    float2 uv = (float2(id.xy) + 0.5) * _TexelSize;
+
+    // Simple box blur
+    float4 color = float4(0, 0, 0, 0);
+    float count = 0;
+
+    for (int y = -2; y <= 2; y++)
+    {
+        for (int x = -2; x <= 2; x++)
+        {
+            float2 offset = float2(x, y) * _TexelSize * _BlurRadius;
+            color += _InputTex.SampleLevel(sampler_InputTex, uv + offset, 0);
+            count += 1.0;
+        }
+    }
+
+    _OutputTex[id.xy] = color / count;
+}

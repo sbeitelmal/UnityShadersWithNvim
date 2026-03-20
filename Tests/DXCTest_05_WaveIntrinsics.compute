@@ -1,0 +1,37 @@
+// DXC Test 5: SM6 Wave Intrinsics
+// EXPECTED: No errors. This is a key DXC advantage over glslang.
+// glslang would reject these; DXC handles them natively.
+// TESTS: WaveActiveSum, WaveActiveBallot, WaveIsFirstLane, WaveGetLaneIndex,
+//        WaveReadLaneFirst — all SM6.0+ features
+
+RWStructuredBuffer<float> _Input;
+RWStructuredBuffer<float> _Output;
+RWStructuredBuffer<uint> _LaneInfo;
+
+[numthreads(64, 1, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID, uint groupIndex : SV_GroupIndex)
+{
+    float value = _Input[id.x];
+
+    // Wave-level reduction — sum across all active lanes
+    float waveSum = WaveActiveSum(value);
+
+    // Ballot — bitmask of lanes where condition is true
+    uint4 ballot = WaveActiveBallot(value > 0.5);
+
+    // Only the first lane in each wave writes the reduction result
+    if (WaveIsFirstLane())
+    {
+        _Output[id.x / WaveGetLaneCount()] = waveSum;
+    }
+
+    // Broadcast from first lane
+    float broadcastValue = WaveReadLaneFirst(value);
+
+    // Lane index for debugging
+    _LaneInfo[id.x] = WaveGetLaneIndex();
+
+    // Prefix sum (exclusive scan)
+    float prefixSum = WavePrefixSum(value);
+    _Output[id.x] = prefixSum + broadcastValue;
+}

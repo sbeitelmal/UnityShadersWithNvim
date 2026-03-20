@@ -1,0 +1,62 @@
+// DXC Test 2: Structs and Multiple Buffer Types
+// EXPECTED: No errors. Clean DXC validation.
+// TESTS: Custom structs, multiple buffer types, groupshared memory
+
+struct Particle
+{
+    float3 position;
+    float3 velocity;
+    float life;
+    float pad;
+};
+
+RWStructuredBuffer<Particle> _Particles;
+StructuredBuffer<float3> _Forces;
+RWByteAddressBuffer _Counter;
+
+cbuffer SimParams : register(b0)
+{
+    float _DeltaTime;
+    float _Damping;
+    uint _ParticleCount;
+    float _Gravity;
+};
+
+groupshared float3 sharedForces[64];
+
+[numthreads(64, 1, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID, uint groupIndex : SV_GroupIndex)
+{
+    // Load force into shared memory
+    if (groupIndex < 64)
+    {
+        sharedForces[groupIndex] = _Forces[groupIndex];
+    }
+    GroupMemoryBarrierWithGroupSync();
+
+    if (id.x >= _ParticleCount)
+        return;
+
+    Particle p = _Particles[id.x];
+
+    // Accumulate forces
+    float3 totalForce = float3(0, -_Gravity, 0);
+    for (uint i = 0; i < 64; i++)
+    {
+        totalForce += sharedForces[i];
+    }
+
+    // Euler integration
+    p.velocity += totalForce * _DeltaTime;
+    p.velocity *= _Damping;
+    p.position += p.velocity * _DeltaTime;
+    p.life -= _DeltaTime;
+
+    _Particles[id.x] = p;
+
+    // Atomic counter for alive particles
+    if (p.life > 0.0)
+    {
+        _Counter.InterlockedAdd(0, 1);
+    }
+}

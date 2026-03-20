@@ -1,0 +1,16 @@
+// DXC Test 4: Built-in Pipeline Include (UnityCG.cginc)
+// EXPECTED: ERRORS — DXC does not understand legacy Cg types (sampler2D, fixed4, etc.)
+// This is a known limitation. Built-in pipeline shaders produce false positives
+// under DXC validation. This test confirms the expected failure mode.
+// TESTS: Confirms DXC correctly rejects legacy Cg syntax
+
+#include "UnityCG.cginc"
+
+RWStructuredBuffer<float4> _Result;
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    // UNITY_PI is defined in UnityCG.cginc
+    _Result[id.x] = float4(UNITY_PI, 0, 0, 1);
+}

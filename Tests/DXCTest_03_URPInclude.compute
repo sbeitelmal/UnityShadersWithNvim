@@ -1,0 +1,25 @@
+// DXC Test 3: URP Core Include
+// EXPECTED: No errors (with .shader-includes symlinks and SHADER_API_D3D11 define).
+// TESTS: pathRemapping resolution via symlinks, URP include chain,
+//        Unity macros from Core.hlsl
+
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+RWStructuredBuffer<float4> _Result;
+uint _Resolution;
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    float2 uv = float2(id.xy) / float(_Resolution);
+
+    // Use URP's PI constant (defined in Common.hlsl via Core.hlsl)
+    float angle = uv.x * PI * 2.0;
+
+    float r = sin(angle) * 0.5 + 0.5;
+    float g = cos(angle) * 0.5 + 0.5;
+    float b = 0.5;
+
+    uint index = id.x + id.y * _Resolution;
+    _Result[index] = float4(r, g, b, 1.0);
+}

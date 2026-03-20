@@ -1,0 +1,33 @@
+// DXC Test 8: Preprocessor Define Passthrough
+// EXPECTED: No errors if SHADER_API_D3D11 and UNITY_VERSION are defined
+//           in .shader-language-server.json. Errors if defines are missing.
+// TESTS: Confirms defines from JSON config are passed through to DXC.
+
+RWStructuredBuffer<float4> _Result;
+
+[numthreads(8, 1, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    float4 color = float4(0, 0, 0, 1);
+
+    // Test SHADER_API_D3D11 — should be defined in .shader-language-server.json
+#if defined(SHADER_API_D3D11)
+    color.r = 1.0; // D3D11 path — expected
+#elif defined(SHADER_API_GLCORE)
+    color.g = 1.0; // GL path
+#else
+    #error "No shader API defined — check .shader-language-server.json defines"
+#endif
+
+    // Test UNITY_VERSION — should be "6000"
+#if !defined(UNITY_VERSION)
+    #error "UNITY_VERSION not defined — check .shader-language-server.json defines"
+#endif
+
+    // Test SHADER_TARGET — should be "50"
+#if !defined(SHADER_TARGET)
+    #error "SHADER_TARGET not defined — check .shader-language-server.json defines"
+#endif
+
+    _Result[id.x] = color;
+}

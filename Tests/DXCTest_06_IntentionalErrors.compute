@@ -1,0 +1,32 @@
+// DXC Test 6: Intentional Errors (Diagnostic Verification)
+// EXPECTED: Multiple specific errors at marked lines.
+// TESTS: Confirms DXC diagnostics are surfaced correctly through the LSP.
+//        Each error is annotated with what you should see.
+
+RWStructuredBuffer<float4> _Result;
+
+// ERROR 1: Undeclared identifier
+float4 UseUndeclared()
+{
+    return _NonExistentBuffer[0]; // Should error: undeclared identifier
+}
+
+// ERROR 2: Type mismatch
+void TypeMismatch()
+{
+    float3 a = float3(1, 2, 3);
+    float4 b = a; // Should error: cannot implicitly convert float3 to float4
+}
+
+// ERROR 3: Missing semicolon
+void MissingSemicolon()
+{
+    float x = 1.0
+    float y = 2.0; // Should error on line above: expected ';'
+}
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    _Result[id.x] = float4(0, 0, 0, 1);
+}

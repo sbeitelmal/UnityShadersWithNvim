@@ -1,0 +1,20 @@
+// DXC Test 1: Basic Compute (No Includes)
+// EXPECTED: No errors. Clean DXC validation.
+// TESTS: Basic HLSL types, RWBuffer, numthreads, SV_DispatchThreadID
+
+RWStructuredBuffer<float4> _Result;
+float _Time;
+uint _Resolution;
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    float2 uv = float2(id.xy) / float(_Resolution);
+
+    float r = sin(uv.x * 6.28 + _Time) * 0.5 + 0.5;
+    float g = cos(uv.y * 6.28 + _Time) * 0.5 + 0.5;
+    float b = sin((uv.x + uv.y) * 3.14 + _Time) * 0.5 + 0.5;
+
+    uint index = id.x + id.y * _Resolution;
+    _Result[index] = float4(r, g, b, 1.0);
+}

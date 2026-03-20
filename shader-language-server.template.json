@@ -1,0 +1,25 @@
+{
+    "includes": [
+        "<UNITY_EDITOR>/Editor/Data/CGIncludes",
+        "<PROJECT_ROOT>/.shader-includes",
+        "<PROJECT_ROOT>/Library/PackageCache/com.unity.render-pipelines.core@<HASH>/ShaderLibrary",
+        "<PROJECT_ROOT>/Library/PackageCache/com.unity.render-pipelines.core@<HASH>/Shaders",
+        "<PROJECT_ROOT>/Library/PackageCache/com.unity.render-pipelines.core@<HASH>/Runtime",
+        "<PROJECT_ROOT>/Library/PackageCache/com.unity.render-pipelines.universal@<HASH>/ShaderLibrary",
+        "<PROJECT_ROOT>/Library/PackageCache/com.unity.render-pipelines.universal@<HASH>/Shaders",
+        "<PROJECT_ROOT>/Library/PackageCache/com.unity.render-pipelines.universal@<HASH>/Runtime",
+        "<PROJECT_ROOT>/Library/PackageCache/com.unity.render-pipelines.universal-config@<HASH>/Runtime"
+    ],
+    "defines": {
+        "UNITY_VERSION": "<MAJOR_VERSION>",
+        "SHADER_TARGET": "50",
+        "SHADER_API_D3D11": "1"
+    },
+    "pathRemapping": {
+        "Packages/com.unity.render-pipelines.core": "<PROJECT_ROOT>/Library/PackageCache/com.unity.render-pipelines.core@<HASH>",
+        "Packages/com.unity.render-pipelines.universal": "<PROJECT_ROOT>/Library/PackageCache/com.unity.render-pipelines.universal@<HASH>",
+        "Packages/com.unity.render-pipelines.universal-config": "<PROJECT_ROOT>/Library/PackageCache/com.unity.render-pipelines.universal-config@<HASH>"
+    },
+    "hlsl": {
+    }
+}
